@@ -161,28 +161,28 @@ menu "Ethernet Configuration"
 
         config MICRO_ROS_ETH_SPI_SCLK_GPIO
             int "SPI SCLK GPIO number"
-            range 0 44
+            range 0 48
             default 20
             help
                 Set the GPIO number used by SPI SCLK.
 
         config MICRO_ROS_ETH_SPI_MOSI_GPIO
             int "SPI MOSI GPIO number"
-            range 0 44
+            range 0 48
             default 19
             help
                 Set the GPIO number used by SPI MOSI.
 
         config MICRO_ROS_ETH_SPI_MISO_GPIO
             int "SPI MISO GPIO number"
-            range 0 44
+            range 0 48
             default 18
             help
                 Set the GPIO number used by SPI MISO.
 
         config MICRO_ROS_ETH_SPI_CS_GPIO
             int "SPI CS GPIO number"
-            range 0 44
+            range 0 48
             default 21
             help
                 Set the GPIO number used by SPI CS.
@@ -248,28 +248,28 @@ menu "UART Settings"
 
 config MICROROS_UART_TXD
     int "UART TX pin"
-    range -1 33
+    range -1 48
     default -1
     help
         Select Tx Down pin for uart connection or -1 for no change (Only used if serial transport is used for microros).
 
 config MICROROS_UART_RXD
     int "UART RX pin"
-    range -1 33
+    range -1 48
     default -1
     help
         Select Rx Down pin for uart connection or -1 for no change (Only used if serial transport is used for microros).
 
 config MICROROS_UART_RTS
     int "UART RTS pin"
-    range -1 33
+    range -1 48
     default -1
     help
         Select RTS Down pin for uart connection or -1 for no change (Only used if serial transport is used for microros).
 
 config MICROROS_UART_CTS
     int "UART CTS pin"
-    range -1 33
+    range -1 48
     default -1
     help
         Select CTS Down pin for uart connection or -1 for no change (Only used if serial transport is used for microros).
