@@ -1,9 +1,13 @@
 ![banner](.images/banner-dark-theme.png#gh-dark-mode-only)
 ![banner](.images/banner-light-theme.png#gh-light-mode-only)
 
+| humble | jazzy | kilted | rolling |
+|:------:|:-----:|:------:|:-------:|
+| [![Nightly (humble)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-humble.yml/badge.svg)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-humble.yml) | [![Nightly (jazzy)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-jazzy.yml/badge.svg)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-jazzy.yml) | [![Nightly (kilted)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-kilted.yml/badge.svg)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-kilted.yml) | [![Nightly (rolling)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-rolling.yml/badge.svg)](https://github.com/micro-ROS/micro_ros_espidf_component/actions/workflows/nightly-rolling.yml) |
+
 # micro-ROS component for ESP-IDF
 
-This component has been tested in ESP-IDF v4.4, and v5.2 with ESP32, ESP32-S2, ESP32-S3, ESP32-C3 and ESP32-C6.
+This component has been tested in ESP-IDF v5.2, v5.3, v5.4, and v5.5 with ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-C6, and ESP32-P4.
 
 ## Dependencies
 
@@ -11,16 +15,18 @@ This component needs `colcon` and other Python 3 packages inside the IDF virtual
 
 ```bash
 . $IDF_PATH/export.sh
-pip3 install catkin_pkg lark-parser colcon-common-extensions empy==3.3.4
+pip3 install catkin_pkg colcon-common-extensions lark
 ```
 
 ## Middlewares available
 
 This package support the usage of micro-ROS on top of two different middlewares:
+
 - [eProsima Micro XRCE-DDS](https://micro-xrce-dds.docs.eprosima.com/en/latest/): the default micro-ROS middleware.
-- [embeddedRTPS](https://github.com/embedded-software-laboratory/embeddedRTPS): an experimental implementation of a RTPS middleware compatible with ROS 2.
+- [embeddedRTPS](https://github.com/embedded-software-laboratory/embeddedRTPS): an experimental implementation of a RTPS middleware compatible with ROS 2. (CURRENTLY NOT WORKING)
 
 In order to select it, use `idf.py menuconfig` and go to `micro-ROS Settings > micro-ROS middleware`
+
 ## Usage
 
 You can clone this repo directly in the `components` folder of your project.
@@ -34,7 +40,7 @@ In order to test a int32_publisher example:
 ```bash
 . $IDF_PATH/export.sh
 cd examples/int32_publisher
-# Set target board [esp32|esp32s2|esp32s3|esp32c3]
+# Set target board [esp32|esp32s2|esp32s3|esp32c3|esp32c6|esp32p4]
 idf.py set-target esp32
 idf.py menuconfig
 # Set your micro-ROS configuration and WiFi credentials under micro-ROS Settings
@@ -61,19 +67,16 @@ docker run -it --rm --net=host microros/micro-ros-agent:jazzy udp4 --port 8888 -
 It's possible to build this example application using the official Espressif [docker images](https://hub.docker.com/r/espressif/idf), following the same steps:
 
 ```bash
-docker pull espressif/idf:release-v5.2
-# Run ESP-IDF container
-docker run --name micro-ros-espidf-component-test -it espressif/idf:release-v5.2 bash
+docker run --name micro-ros-espidf-component -it espressif/idf:release-v5.5 bash
 
-git clone https://github.com/micro-ROS/micro_ros_espidf_component.git
+git clone -b jazzy https://github.com/micro-ROS/micro_ros_espidf_component.git
 cd micro_ros_espidf_component/
 
 # Install dependencies
-pip3 install catkin_pkg lark-parser colcon-common-extensions
+pip install catkin_pkg colcon-common-extensions lark
 
-$IDF_PATH/export.sh
 cd examples/int32_publisher
-# Set target board [esp32|esp32s2|esp32s3|esp32c3]
+# Set target board [esp32|esp32s2|esp32s3|esp32c3|esp32c6]
 idf.py set-target esp32
 idf.py menuconfig
 # Set your micro-ROS configuration and WiFi credentials under micro-ROS Settings

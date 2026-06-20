@@ -10,9 +10,6 @@ else
 	BUILD_TYPE = Release
 endif
 
-CFLAGS_INTERNAL := $(X_CFLAGS) -ffunction-sections -fdata-sections
-CXXFLAGS_INTERNAL := $(X_CXXFLAGS) -ffunction-sections -fdata-sections
-
 all: $(EXTENSIONS_DIR)/libmicroros.a
 
 clean:
@@ -27,8 +24,6 @@ $(EXTENSIONS_DIR)/esp32_toolchain.cmake: $(EXTENSIONS_DIR)/esp32_toolchain.cmake
 	cat $(EXTENSIONS_DIR)/esp32_toolchain.cmake.in | \
 		sed "s/@CMAKE_C_COMPILER@/$(subst /,\/,$(X_CC))/g" | \
 		sed "s/@CMAKE_CXX_COMPILER@/$(subst /,\/,$(X_CXX))/g" | \
-		sed "s/@CFLAGS@/$(subst /,\/,$(CFLAGS_INTERNAL))/g" | \
-		sed "s/@CXXFLAGS@/$(subst /,\/,$(CXXFLAGS_INTERNAL))/g" | \
 		sed "s/@IDF_TARGET@/$(subst /,\/,$(IDF_TARGET))/g" | \
 		sed "s/@IDF_PATH@/$(subst /,\/,$(IDF_PATH))/g" | \
 		sed "s/@BUILD_CONFIG_DIR@/$(subst /,\/,$(BUILD_DIR)/config)/g" \
@@ -83,7 +78,7 @@ $(EXTENSIONS_DIR)/micro_ros_src/src:
 	touch src/rcl/rcl_yaml_param_parser/COLCON_IGNORE; \
 	touch src/ros2_tracing/test_tracetools/COLCON_IGNORE; \
 	touch src/ros2_tracing/lttngpy/COLCON_IGNORE; \
-	cp -rf $(EXTRA_ROS_PACKAGES) src/extra_packages || :; \
+	cp -rfL $(EXTRA_ROS_PACKAGES) src/extra_packages || :; \
 	test -f src/extra_packages/extra_packages.repos && cd src/extra_packages && vcs import --input extra_packages.repos || :;
 
 
@@ -109,49 +104,7 @@ $(EXTENSIONS_DIR)/micro_ros_src/install: $(EXTENSIONS_DIR)/esp32_toolchain.cmake
 		-DCMAKE_C_STANDARD=$(C_STANDARD) \
 		-DUCLIENT_C_STANDARD=$(C_STANDARD);
 
-patch_atomic:$(EXTENSIONS_DIR)/micro_ros_src/install
-# Workaround https://github.com/micro-ROS/micro_ros_espidf_component/issues/18
-ifeq ($(IDF_TARGET),$(filter $(IDF_TARGET),esp32s2 esp32c3 esp32c6))
-		echo $(UROS_DIR)/atomic_workaround; \
-		mkdir $(UROS_DIR)/atomic_workaround; cd $(UROS_DIR)/atomic_workaround; \
-		$(X_AR) x $(UROS_DIR)/install/lib/librcutils.a; \
-		$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_fetch_add_8; \
-		if [ $(IDF_VERSION_MAJOR) -ge 4 ] && [ $(IDF_VERSION_MINOR) -ge 3 ]; then \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_load_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_store_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_exchange_8; \
-		fi; \
-		if [ $(IDF_VERSION_MAJOR) -ge 4 ] && [ $(IDF_VERSION_MINOR) -ge 4 ]; then \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_load_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_store_8; \
-		fi; \
-		if [ $(IDF_VERSION_MAJOR) -ge 5 ] && [ $(IDF_VERSION_MINOR) -ge 0 ]; then \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_load_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_store_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_exchange_8; \
-		fi; \
-		$(X_AR) rc -s librcutils.a *.obj; \
-		cp -rf librcutils.a  $(UROS_DIR)/install/lib/librcutils.a; \
-		cd ..; \
-		rm -rf $(UROS_DIR)/atomic_workaround;
-endif
-ifeq ($(IDF_TARGET),$(filter $(IDF_TARGET),esp32))
-		echo $(UROS_DIR)/atomic_workaround; \
-		mkdir $(UROS_DIR)/atomic_workaround; cd $(UROS_DIR)/atomic_workaround; \
-		$(X_AR) x $(UROS_DIR)/install/lib/librcutils.a; \
-		$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_fetch_add_8; \
-		if [ $(IDF_VERSION_MAJOR) -ge 5 ] && [ $(IDF_VERSION_MINOR) -ge 3 ]; then \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_load_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_store_8; \
-			$(X_STRIP) atomic_64bits.c.obj --strip-symbol=__atomic_exchange_8; \
-		fi; \
-		$(X_AR) rc -s librcutils.a *.obj; \
-		cp -rf librcutils.a  $(UROS_DIR)/install/lib/librcutils.a; \
-		cd ..; \
-		rm -rf $(UROS_DIR)/atomic_workaround;
-endif
-
-$(EXTENSIONS_DIR)/libmicroros.a: $(EXTENSIONS_DIR)/micro_ros_src/install patch_atomic
+$(EXTENSIONS_DIR)/libmicroros.a: $(EXTENSIONS_DIR)/micro_ros_src/install
 	mkdir -p $(UROS_DIR)/libmicroros; cd $(UROS_DIR)/libmicroros; \
 	for file in $$(find $(UROS_DIR)/install/lib/ -name '*.a'); do \
 		folder=$$(echo $$file | sed -E "s/(.+)\/(.+).a/\2/"); \
